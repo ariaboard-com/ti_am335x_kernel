@@ -134,3 +134,9 @@ all.config
 
 # Kdevelop4
 *.kdev4
+
+/deploy
+/build.sh
+/build
+
+/drivers/staging/bcmdhd/sdio_func

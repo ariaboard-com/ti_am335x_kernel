@@ -54,7 +54,7 @@ enum aic3x_micbias_voltage {
 };
 
 struct aic3x_setup_data {
-	unsigned int gpio_func[2];
+	unsigned int gpio_func[5];
 };
 
 struct aic3x_pdata {

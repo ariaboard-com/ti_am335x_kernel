@@ -714,27 +714,6 @@ static const struct snd_soc_dapm_widget aic3x_extra_dapm_widgets[] = {
 	SND_SOC_DAPM_MUX("Right Line2R Mux", SND_SOC_NOPM, 0, 0,
 			 &aic3x_right_line2_mux_controls),
 
-	/*
-	 * Not a real mic bias widget but similar function. This is for dynamic
-	 * control of GPIO1 digital mic modulator clock output function when
-	 * using digital mic.
-	 */
-	SND_SOC_DAPM_REG(snd_soc_dapm_micbias, "GPIO1 dmic modclk",
-			 AIC3X_GPIO1_REG, 4, 0xf,
-			 AIC3X_GPIO1_FUNC_DIGITAL_MIC_MODCLK,
-			 AIC3X_GPIO1_FUNC_DISABLED),
-
-	/*
-	 * Also similar function like mic bias. Selects digital mic with
-	 * configurable oversampling rate instead of ADC converter.
-	 */
-	SND_SOC_DAPM_REG(snd_soc_dapm_micbias, "DMic Rate 128",
-			 AIC3X_ASD_INTF_CTRLA, 0, 3, 1, 0),
-	SND_SOC_DAPM_REG(snd_soc_dapm_micbias, "DMic Rate 64",
-			 AIC3X_ASD_INTF_CTRLA, 0, 3, 2, 0),
-	SND_SOC_DAPM_REG(snd_soc_dapm_micbias, "DMic Rate 32",
-			 AIC3X_ASD_INTF_CTRLA, 0, 3, 3, 0),
-
 	/* Output mixers */
 	SND_SOC_DAPM_MIXER("Left Line Mixer", SND_SOC_NOPM, 0, 0,
 			   &aic3x_left_line_mixer_controls[0],
@@ -1644,6 +1623,13 @@ static int aic3x_probe(struct snd_soc_component *component)
 				      (aic3x->setup->gpio_func[0] & 0xf) << 4);
 			snd_soc_component_write(component, AIC3X_GPIO2_REG,
 				      (aic3x->setup->gpio_func[1] & 0xf) << 4);
+
+			snd_soc_component_update_bits(component, AIC3X_ASD_INTF_CTRLA,
+				      0x3 << 0, (aic3x->setup->gpio_func[2] & 0x3) << 0);
+			snd_soc_component_update_bits(component, MICBIAS_CTRL,
+				      0x3 << 4, (aic3x->setup->gpio_func[3] & 0x3) << 4);
+			snd_soc_component_update_bits(component, NEW_ADC_DIGITALPATH,
+				      0x3 << 4, (aic3x->setup->gpio_func[4] & 0x3) << 4);
 		} else {
 			dev_warn(component->dev, "GPIO functionality is not supported on tlv320aic3104\n");
 		}
@@ -1834,7 +1820,7 @@ static int aic3x_i2c_probe(struct i2c_client *i2c,
 		}
 
 		if (of_property_read_u32_array(np, "ai3x-gpio-func",
-					ai3x_setup->gpio_func, 2) >= 0) {
+					ai3x_setup->gpio_func, 5) >= 0) {
 			aic3x->setup = ai3x_setup;
 		}
 

@@ -18,7 +18,9 @@
 #endif
 
 static bool nologo;
+
 module_param(nologo, bool, 0);
+
 MODULE_PARM_DESC(nologo, "Disables startup logo");
 
 /*
